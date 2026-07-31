@@ -1,0 +1,23 @@
+{
+  "name": "prooftube-protocol",
+  "version": "1.0.0-alpha",
+  "description": "Sovereign, peer-to-peer media protocol driven by Nostr, WebRTC mesh, and multi-chain settlement.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "build": "cd client && npm run build"
+  },
+  "keywords": [
+    "nostr",
+    "peertube",
+    "webrtc",
+    "l402",
+    "lightning",
+    "p2p-video",
+    "decentralized-media"
+  ],
+  "author": "ProofTube Protocol Stewards",
+  "license": "MIT"
+}
