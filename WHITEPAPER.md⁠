@@ -1,0 +1,311 @@
+
+ProofTube: A Sovereign, Peer-to-Peer Media Network Driven by Nostr Identity, Universal Multi-Chain Settlement, and Dynamic Self-Sustaining Tokenomics
+Technical Whitepaper v2.14 Authors: Pseudonymous Protocol Stewards License: Open Source — MIT / Creative Commons Zero (CC0)
+Abstract
+Centralized video streaming platforms have increasingly shifted from open public squares to gated ecosystems reliant on intrusive age-assurance mandates, real-name digital identity checks, aggressive algorithmic shadowbanning, and centralized financial censorship.
+ProofTube introduces a simplified, peer-to-peer (P2P), open-source protocol designed to host, stream, and monetize digital media without central corporate gateways, mandatory digital identity verification, or centralized payment processors.
+By combining the PeerTube video engine (ActivityPub federation + client-side WebRTC P2P mesh delivery with Client SHA-256 Segment Auditing & Proof-of-Viewer Receipts), Nostr open protocol cryptographic keys for channel identity and Web of Trust moderation, S3-compatible object storage backed by CDN edge caching with automated cache-invalidation webhooks, a Universal Multi-Chain Gateway with Session Balance Top-Ups ($5.00 Minimum Threshold for Cross-Chain DEX Swaps) (supporting Lightning,$PROOF, EVM, Solana, and USDC), 8-Decimal Native Sub-Units (Micro-PROOFs / Proof-Sats), a Dynamic Token Unit Scaling Engine, Ecosystem Treasury Recycling (replacing token burns with perpetual liquidity circularity), Genesis Tokenomics ($PROOF) with a 20% Founder & Core Team 4-year vesting schedule, an Anti-Sybil Infrastructure & Primary-Creator Rewarded Ad Engine (45/45/5/5 Split) featuring a Smart-Contract Locked Escrow Vault, an automated Primary Authenticity Engine with OpenTimestamps / Bitcoin Block Anchoring, Overlaid Dual-Player Canvas Architecture for mobile iOS execution, Pre-fetched L402 Key Requests, Proof-of-Bandwidth rewards, Tiered Resolution Peer Thresholds, NIP-09 Deletion Event Relay Blacklisting, low-cost Litecoin (LTC) node hosting settlements, an All-in-One Application Suite & 7-Platform Double-Publishing Bridge Hub (YouTube, Rumble, Substack, Telegram, Kick, Odysee, and Podcasting 2.0 / Fountain), a Safe-Harbor Node Protocol Compliance Spec, and Direct Self-Custody Wallet Exports, ProofTube creates an economically self-sustaining, legally safe, highly incentivized, zero-friction media ecosystem across desktop and mobile platforms.
+1. Introduction & Problem Statement
+Digital content delivery networks (CDNs) currently suffer from critical technical and human adoption structural vulnerabilities:
+Mandatory Identity Harvesting: Government regulations force platforms to collect biometric, passport, or credit card data to gate standard content.
+Financial Intermediary Control: Centralized payment rails reserve the right to freeze accounts, withhold creator revenues, or enforce 30-to-60-day payout holds.
+Over-Engineered Crypto Protocols: Early Web3 video attempts failed by placing heavy video transcoding and state-chain settlement on layer-1 or layer-2 smart contracts, leading to cost surges, buffering, and massive onboarding friction.
+Token Velocity & Liquidity Freeze Vulnerabilities: Unstructured team allocations, destructive token burn mechanisms, and un-capped "Watch-to-Earn" bot farming drain network liquidity and make content prohibitively expensive as token prices appreciate.
+Mobile Engine, Sybil & Concurrency Vulnerabilities: Web3 media apps frequently break on mobile browsers due to Safari audio context revokes and thread-freezing, while federated networks suffer from minute 03:00 paywall DDoS surges, rogue node ad-farming sybil attacks, WebRTC chunk poisoning, and lingering CDN edge cache retention of deleted media.
+Human Infrastructure & Real-World Friction Gaps: Theoretical Web3 protocols fail in the real world due to creator migration inertia ("Cold-Start"), node operator legal liability risks, banking chargeback fraud, and tool fatigue from juggling fragmented Web2 platforms.
+ProofTube v2.14 resolves these issues by anchoring video streaming to open primitives—decoupling Identity via Nostr, Video Delivery via PeerTube WebRTC mesh with client checksum verification, Monetization via a Universal Multi-Chain Router with threshold top-ups, Network Sustainability via an 8-decimal recycled token model with 4-year founder vesting, and real-world adoption via an All-in-One 7-platform bridge hub, a Locked Escrow Vault, an OpenTimestamp-anchored Primary Authenticity Engine, node compliance shields, self-custody wallet exports, and a unified creator suite.
+2. Protocol Architecture & Technical Stack
++-----------------------------------------------------------------------------------+
+|                        1. PRESENTATION & CLIENT LAYER                             |
+|  Web / Mobile SPA | Service Worker Thread | WebLN / NWC / WalletConnect           |
++-----------------------------------------+-----------------------------------------+
+                                          |
+                                          v
++-----------------------------------------------------------------------------------+
+|               2. PEERTUBE P2P MESH & CACHED STORAGE LAYER                         |
+|  Client WebRTC Seeders | CDN Edge Cache Proxy | S3-Compatible Cloud Storage       |
+|  Client SHA-256 Segment Auditing | Proof-of-Viewer Bandwidth Receipts             |
++-----------------------------------------+-----------------------------------------+
+                                          |
+                                          v
++-----------------------------------------------------------------------------------+
+|               3. NOSTR SOVEREIGN IDENTITY & WEB OF TRUST                          |
+|  Nostr Keys (npub / nsec) | Event Relays | NIP-09 Deletion Hash Blacklists        |
++-----------------------------------------+-----------------------------------------+
+                                          |
+                                          v
++-----------------------------------------------------------------------------------+
+|          4. UNIVERSAL MULTI-CHAIN GATEWAY & RECYCLED TREASURY ENGINE              |
+| Lightning / Zaps | WalletConnect (EVM/SOL) | $PROOF Sats | LTC Node AMM Swap     |
+| Cross-Chain DEX Swaps (Strictly Enforced $5.00+ Session Top-Up Threshold)          |
++-----------------------------------------------------------------------------------+
+
+
+2.1 Video Storage, CDN Caching, Tiered Resolutions & Anti-Poisoning P2P Mesh
+ProofTube utilizes the open-source PeerTube core engine for encoding, delivery, and federation:
+Adaptive Bitrate HLS & WebRTC P2P Mesh: Active viewers watching the same stream automatically share video segments client-side via WebRTC, drastically reducing server bandwidth costs during viral traffic spikes.
+Client SHA-256 Segment Auditing & Proof-of-Viewer Receipts: To eliminate WebRTC chunk poisoning and fake peer-seeding sybil farms, the client player verifies the SHA-256 checksum of every received .ts video segment against the master playlist manifest before rendering. Before a node receives bandwidth credit toward its Active Seeding Reputation Score, the receiving client player generates a cryptographically signed micro-receipt confirming a real human session consumed the segment.
+S3-Compatible Cloud Storage & CDN Edge Proxy: When viewer peer counts fall to zero (or on mobile browsers with restricted WebRTC data channels), streams fall back to cheap S3 storage (e.g., Cloudflare R2, Backblaze B2, or MinIO). S3 storage sits behind a global CDN edge cache proxy configured to support byte-range caching and CORS headers.
+Tiered Resolution Peer Thresholds: To protect node bandwidth budgets on low-traffic, zero-peer long-tail videos, stream delivery is dynamically throttled based on active peer counts:
+< 5 Active Peers (Solo Viewer Mode): Stream resolution is capped at 720p HD directly from CDN/S3 storage.
+>= 5 Active Peers (Mesh Mode Unlocked): The player automatically unlocks 1080p and 4K Ultra HD resolutions, leveraging WebRTC peer seeding.
+Cold Storage Auto-Pruning: If a creator’s account balance falls to zero and their media receives zero views for 90 consecutive days, the host node automatically demotes unseeded files to cheap cold storage or purges unseeded local copies.
+2.2 Sovereign Identity & Mobile Service Worker Execution Architecture
+ProofTube replaces centralized user databases and email logins with the Nostr protocol:
+Channel Identity: Channels are represented by a Nostr public key (npub). Creators retain 100% cryptographic ownership of their identity, subscriber graph, and post metadata.
+Federated Portability: If a node shuts down or censors a creator, the creator simply inputs their key into any other Nostr-compatible node, instantly restoring their entire channel, follower base, and comment history across the open Nostr network.
+Mobile Background Service Worker Execution: To prevent iOS Safari thread-freezing during app-switching (e.g., jumping to a native wallet app for NWC/WebLN payments), L402 challenge tokens, payment preimages, and cryptographic key exchanges execute inside a persistent Background Web Worker / Service Worker thread.
+2.3 Flexible Freemium Model & Pre-Fetched L402 Key Architecture (40/60 Split)
+               ┌──────────────────────────────────────────────┐
+               │         TIER 0: ANONYMOUS GUEST              │
+               │  Free 100% public streaming. No login,       │
+               │  no wallet, no tokens required.               │
+               └──────────────────────┬───────────────────────┘
+                                      │
+                                      ▼
+               ┌──────────────────────────────────────────────┐
+               │    TIER 1: INTERACTIVE CREATOR / VIEWER      │
+               │  Connect Nostr Key (npub) & Preferred Wallet │
+               │  Unlocks 1-click tipping, commenting, and    │
+               │  paywalled premium video uploads (Max 60%).   │
+               └──────────────────────────────────────────────┘
+
+
+Tier 0: Anonymous Guest Viewing (Free)
+Anyone can watch and stream public content anonymously without logging in or holding tokens.
+Tier 1: Interactive Viewer & Creator Access
+1-Click Authentication: Viewers connect via a Nostr extension or Nostr Wallet Connect (NWC) / LNURL-Pay deep links (lightning:).
+Runtime-Based 40/60 Content Ratio: Creators must keep at least 40% of their total channel runtime seconds free for public discovery, allowing up to 60% of their catalog to sit behind paywalls.
+Segmented Pre-Fetched Key Architecture (Minute 01:00 Pre-Fetch): Paywalled videos automatically stream the initial 3 minutes unencrypted. To prevent high-concurrency DDoS spikes on the node proxy at minute 03:00 during viral broadcasts, the client player automatically pre-fetches the L402 Macaroon and Lightning invoice in the background at minute 01:00. The viewer's session wallet completes the micro-payment silently between minutes 01:00 and 03:00.
+2.4 Genesis Token Allocation, 8-Decimal Precision & Ecosystem Treasury Recycling
+$PROOF is issued as a hard-capped Taproot Asset / SIP-010 utility token with a total fixed supply of 1,000,000,000 $PROOF.
+                     $PROOF GENESIS ALLOCATION (1B TOTAL SUPPLY)
+                                          │
+       ┌──────────────────────────────────┼──────────────────────────────────┐
+       ▼                                  ▼                                  ▼
+FOUNDER & CORE TEAM (20%)       ECOSYSTEM & DEVELOPER TREASURY (25%) COMMUNITY & INFRASTRUCTURE (55%)
+  ├── 1-Year Full Lockup          ├── 100% Recycled Protocol Fees     ├── Watch-to-Earn Rewards
+  └── 3-Year Linear Vesting       └── Developer Grants & Audits       └── DEX Liquidity Provision
+
+
+2.4.1 Native Sub-Unit Precision (8 Decimals / Proof-Sats)
+To accommodate micro-cent ad payments and future-proof the protocol as token value appreciates, $PROOF is instantiated on-chain with 8 decimal places:
+1 \text{ \$PROOF} = 100,000,000 \text{ Micro-PROOFs (or Proof-Sats)}
+All smart contracts execute state transitions using raw integer sub-units (uint64).
+2.4.2 Distribution & Perpetual Recycling Framework
+Founder & Core Team Pool (20% — 200,000,000 $PROOF): Subject to a strict 12-Month Cliff followed by 36-Month Linear Monthly Vesting (4-year total vesting horizon).
+Ecosystem & Developer Treasury Pool (25% — 250,000,000 $PROOF + Recycled Inflows): ProofTube does not burn tokens. Instead, 100% of protocol routing fees and ad reserve shares are continuously recycled back into the Ecosystem Treasury Pool to fund developer grants, audits, and infrastructure subsidies.
+Community & Infrastructure Pool (55% — 550,000,000 $PROOF): 30% to Proof-of-Bandwidth rewards, 15% to node subsidies/creator onboarding, and 10% to DEX liquidity.
+2.5 Universal Multi-Chain Router, Threshold Session Top-Ups & Locked Escrow Vault
+                       PROOFTUBE UNIVERSAL PAYWALL ROUTER
+                                         │
+     ┌───────────────────────────────────┼───────────────────────────────────┐
+     ▼                                   ▼                                   ▼
+RAIL 1: NATIVE LIGHTNING / ZAPS     RAIL 2: NATIVE $PROOF TOKEN         RAIL 3: MULTI-CHAIN WEB3 WALLETS
+(WebLN / NWC / Sats)               (Direct Proof-Sat Sub-Units)        (EVM / Solana / USDC / DEX Swaps)
+     │                                   │                                   │
+     ├── Direct Lightning Invoice        ├── Micro-PROOF / Proof-Sat Transfer├── Minimum $5.00 Session Top-Up
+     └── Instant L402 Key Release        └── Instant L402 Key Release        └── Gasless L402 Key Release
+
+
+Universal Multi-Chain Gateway & Threshold Top-Ups: Viewers unlock paywalls or tip creators natively using Bitcoin Lightning, $PROOF tokens (Proof-Sats), EVM chains (ETH, Base, Polygon), Solana, or USDC. To protect viewers from gas spikes, slippage, and MEV sandwich bots on micro-transactions, cross-chain DEX swaps execute strictly for Session Balance Top-Ups equal to or exceeding a $5.00 minimum threshold. Direct micro-paywalls under 2.00 execute exclusively through instant off-chain session balances, native Lightning Sats, orPROOF sub-units.
+Dynamic Token Unit Scaling Engine: Smart contracts specify target satoshi/value tiers (e.g., 1,000 Sats per unlock). DEX oracle hooks adjust required sub-unit payments dynamically: \text{Required Sub-Units} = \frac{\text{Target Sat Value}}{\text{Current \$PROOF / Sat Rate}} \times 10^8
+                   REWARDED AD REVENUE DISTRIBUTION (45/45/5/5 SPLIT)
+                                           │
+      ┌───────────────────────────┬────────┴───────────┬───────────────────────────┐
+      ▼                           ▼                    ▼                           ▼
+45% TO QUALIFIED NODES      45% TO CREATORS          5% TO VIEWER                5% TO TREASURY POOL
+(Subject to Verified        (Stored in Locked        (Micro-drip in Proof-Sats   (Recycled perpetually
+ Proof-of-Viewer Receipts)   Escrow Vault until      to local session wallet)    for protocol grants)
+                             Primary Status Unlocks)
+
+
+Anti-Sybil Infrastructure & Creator Rewarded Ad Engine: Viewers watch 30-second rewarded ads to earn micro-token bonuses. Advertisers deposit native crypto into L402 campaign escrows, split 45% Node, 45% Creator, 5% Viewer, and 5% Treasury.
+The Smart-Contract Locked Escrow Vault: For passive/mirrored channels, the 45% Creator Ad Split accumulates automatically in a transparent, smart-contract-backed Escrow Vault tied to the creator's Nostr key (npub). Creators view their growing balance live on their dashboard, but funds remain locked until they activate their Primary Base Status.
+Active Seeding Reputation Score (Anti-Sybil Gate): Node hosts must achieve an Active Seeding Reputation Score (minimum 30 consecutive days online + minimum 100GB of verified WebRTC peer bandwidth backed by signed Proof-of-Viewer receipts) before qualifying for ad payouts.
+Overlaid Dual-Player Canvas Architecture (iOS Fix): Rewarded ads play inside an overlaid, floating HTML5 ad element rendered above the primary player canvas, preserving mobile Safari's active audio context.
+Low-Cost Node Settlement (Litecoin / LTC): Independent node operators charge hosting fees settled directly on Litecoin (LTC), with a 15% discount for payments in $PROOF tokens.
+3. Real-World Adoption & Human Infrastructure Modules
+To eliminate real-world operational friction, ProofTube v2.14 integrates four core modules bridging the protocol to human creator workflows, legal protections, automated authenticity, and self-custody wallet management under a single unified application interface:
+3.1 All-In-One Sovereign App & 7-Platform Double-Publishing Bridge Suite
+ProofTube delivers an All-in-One Application Suite that brings every publishing format and external channel under one roof:
+7-Platform Bridge Hub: Open-source background daemons and Telegram bots ingest public feeds from YouTube, Rumble, Substack, Telegram, Kick (live VODs), Odysee, and Podcasting 2.0 / Fountain (RSS Value-for-Value feeds). New media uploads are automatically transcoded and published onto ProofTube under the creator's Nostr key (npub) without manual effort.
+All-In-One Sovereign App Dashboard: Primary creators run their entire digital media business from a single control center powered by their Nostr keypair (npub/nsec). Creators can upload 4K video, publish long-form written newsletters (replacing Substack), drop micro-blog updates (replacing Telegram/X/Rumble posts), and distribute audio/video podcasts—all broadcasting seamlessly across open Nostr relays.
+Portable Audience Graphs: Subscriber lists are cryptographically anchored to Nostr keys (npub) on open relays rather than locked in a corporate database. Viewers browse, search, and consume content across any channel globally within the unified ProofTube app, while creators permanently own 100% of their audience graph across the entire Nostr ecosystem forever.
+3.2 The Primary Authenticity Engine (Bitcoin Block-Anchored Honesty)
+To ensure creators maintain honest publishing habits without relying on human judges or unverified client-side timestamps, the protocol enforces Primary Status using immutable, code-based cryptographic verification:
+OpenTimestamps / Bitcoin Block Anchoring (The 24-Hour Lead Rule): To prevent creators from spoofing Nostr event timestamps (created_at), a video payload's publication time on ProofTube is verified against an OpenTimestamps Bitcoin block hash proof or verified relay arrival receipt hash. Node background daemons verify that this block-anchored timestamp is at least 24 hours prior to the Web2 release timestamp on YouTube, Rumble, Substack, Telegram, Kick, Odysee, or Fountain (or maintains 90% catalog parity over a rolling 30-day window).
+Automated Grace Period & Re-Lock: If a creator violates the lead rule on consecutive uploads, the smart contract automatically pauses direct withdrawals and routes their 45% ad earnings back into the Locked Escrow Vault. Once the creator restores their 24-hour lead publishing habit for 14 consecutive days, the vault unlocks automatically.
+3.3 Safe-Harbor Protocol Compliance Spec (Node Operator Protection)
+While node operators process media like Bitcoin miners, video hosting presents local regulatory and legal risks. ProofTube v2.14 equips node operators with automated legal compliance tools built directly into the node admin dashboard:
+Automated DMCA & Illegal Content Endpoints: Nodes generate standardized, machine-readable reporting endpoints (e.g., /.well-known/dmca-notice) that automatically execute local index removal, trigger physical S3 object key purging, and fire global CDN cache invalidations upon verified legal notices.
+Automated Geo-Fencing Toggles: Node operators can configure regional IP geo-fencing rules via edge middleware to restrict media distribution in specific jurisdictions where local content regulations conflict with node hosting policies, protecting node operators from legal liability.
+3.4 Direct Self-Custody Wallet Export Engine
+By maintaining a 100% crypto-native architecture, ProofTube puts full financial sovereignty back in the hands of creators and node operators:
+Direct Self-Custody Payouts: All earnings ($PROOF sub-units, Sats, LTC) settle directly into user-controlled session wallets or external hardware/software wallets (e.g., Tangem, Xverse, Alby, or Revolut X).
+User-Managed Conversion: Users retain full control over when, where, and how they convert their native crypto into local currency using their preferred non-custodial wallets or personal exchange accounts, completely insulating the protocol and node hosts from chargebacks, rolling reserves, and banking oversight.
+4. Moderation, Storage Pruning, Automated CDN Purge & NIP-09 Blacklisting
+                       CONTENT UPLOADED TO PEERTUBE NODE
+                                     │
+                                     ▼
+                      NOSTR RELAY FEDERATION & MUTE LISTS
+                                     │
+             ┌───────────────────────┴───────────────────────┐
+             ▼                                               ▼
+   LOCAL NODE MODERATION                            COMMUNITY MUTE LIST
+ 1. Index link dropped from search                (Subscribed users auto-hide
+ 2. Automated S3 API call deletes                  content based on trust web)
+    physical media object keys
+ 3. Trigger Automated CDN Cache-Purge Webhook
+    (Purges edge .ts chunks instantly)
+ 4. Broadcast NIP-09 Deletion Event (Kind 5)
+    with media file hash to peer nodes
+
+
+Federated Node Autonomy: Every node operator maintains sovereign control over their server index.
+Physical Storage-Level Pruning & CDN Cache Purge Webhooks: Removing non-compliant content triggers an automated S3:DeleteObject API call to purge physical object keys, simultaneously firing an Automated CDN Cache-Purge Webhook (Cloudflare API / purge_cache) to invalidate cached .ts video chunks across edge nodes worldwide.
+NIP-09 Deletion Event Relay Blacklisting: Purging an S3 key broadcasts a signed Nostr Deletion Event (kind: 5, NIP-09) containing the SHA-256 media hash to peer nodes, blocking future auto-fetching.
+Client-Side Mute Lists: Users subscribe to community-curated Nostr blocklists (NIP-51) to filter flagged content client-side automatically.
+5. Technical Comparison
+Feature
+Over-Engineered Models
+ProofTube v2.14 (Production-Ready)
+Video Engine
+Custom Livepeer GPU Relays
+PeerTube Engine (WebRTC P2P + CDN S3 + SHA-256 Checksums)
+User Identity
+zkEmail / Custom Token Delegation
+Open Nostr Cryptographic Keys (npub)
+Token Allocation
+Unstructured / Unvested
+20% Founder Allocation (1-Yr Cliff + 3-Yr Vest)
+App Scope
+Single-purpose video player
+All-in-One Suite (Video, Newsletter, Podcast, Social)
+Creator Onboarding
+Manual re-upload required
+7-Platform Bridge Hub (YouTube, Rumble, Substack, etc.)
+Ad Revenue Vault
+None / Instantly drained
+Locked Escrow Vault (Unlocks upon Primary Status)
+Platform Honesty
+Manual admin reviews / DAOs
+Primary Authenticity Engine (OpenTimestamps Block Proofs)
+Node Legal Protection
+No legal framework
+Safe-Harbor Spec (DMCA Endpoints + Geo-Fencing)
+Payment Architecture
+Credit cards & fiat chargebacks
+Multi-Chain Crypto ($5.00+ DEX Top-Up Threshold)
+Wallet Model
+Custodial platform accounts
+Direct Self-Custody Wallet Exports
+Governance Overhead
+Complex DAOs & voting political boards
+Zero Platform DAO (Pure Open-Source Code & Math)
+Ad Security
+Vulnerable to bot farming
+Proof-of-Viewer Receipts + Active Seeding Reputation
+Paywall Load
+Minute 03:00 DDoS spikes
+Pre-Fetched L402 Key Requests (Minute 01:00)
+Mobile Ad UX
+iOS Safari audio drops
+Overlaid Dual-Player Canvas Architecture
+Content Purging
+Origin S3 delete only
+S3 Delete + Automated CDN Edge Cache Purge
+Fee Model
+Destructive Token Burns
+100% Recycled Ecosystem Treasury Pool
+Monetization
+Single-chain token gates
+Universal Gateway + 45/45/5/5 Rewarded Ads
+Node Funding
+Protocol Treasury inflation
+Litecoin (LTC) DCA AMM payments (15% $PROOF discount)
+
+6. Conclusion
+ProofTube v2.14 establishes an open, battle-tested, and censorship-resistant digital media network that bridges cutting-edge crypto-primitives to real-world human adoption. By combining PeerTube, Nostr, Universal Multi-Chain Routers ($5.00+ Top-Up Threshold), 8-Decimal Precision, Ecosystem Treasury Recycling, Anti-Sybil Rewarded Ads (45/45/5/5 Split), Client SHA-256 Segment Auditing, Proof-of-Viewer Receipts, the Smart-Contract Locked Escrow Vault, the OpenTimestamp-Anchored Primary Authenticity Engine, Pre-fetched L402 Keys, Dual-Canvas Mobile Execution, Automated CDN Cache Purging, NIP-09 Deletion Blacklisting, Tiered Resolution Thresholds, Proof-of-Bandwidth tokenomics, Litecoin DCA AMM node settlement, 4-year Founder Vesting, the All-in-One Sovereign App Suite, Automated 7-Platform Bridges (YouTube, Rumble, Substack, Telegram, Kick, Odysee, Podcasting 2.0), Safe-Harbor Compliance Shields, and Direct Self-Custody Wallet Exports, ProofTube delivers a lean, production-ready media platform where creators retain full audience ownership, viewers stream without friction, node operators run profitable and legal businesses without administrative governance overhead, and digital media streams securely without central corporate gatekeepers.
+APPENDIX A: V1.0 Developer Implementation Roadmap & Tech Stack Blueprint
++-----------------------------------------------------------------------------------+
+|                           PROOFTUBE V1.0 SYSTEM ARCHITECTURE                      |
++-----------------------------------------+-----------------------------------------+
+| CLIENT: React / Next.js Dual Canvas SPA + Service Worker (WebLN + NWC + Nostr)    |
++-----------------------------------------+-----------------------------------------+
+                                          |
+                                          v
++-----------------------------------------------------------------------------------+
+| NODE ENGINE: Forked PeerTube Core (Express / Node.js API + ffmpeg + ActivityPub)  |
++-----------------------------------+-----------------------------------------------+
+                                    |
+            ┌───────────────────────┴───────────────────────┐
+            ▼                                               ▼
++-----------------------+                       +-----------------------+
+|  STORAGE / CDN LAYER  |                       |  IDENTITY & STATE     |
+| Cloudflare R2 / S3    |                       | Nostr Relays (NIP-01) |
+| Cloudflare API Purge  |                       | NIP-09 Hash Blacklist |
++-----------------------+                       +-----------------------+
+
+
+A.1 Phase 1: Core Engine, Service Worker & Identity Setup (Weeks 1–4)
+Base Engine Fork: Fork PeerTube engine for ActivityPub federation, ffmpeg transcoding queues, Tiered Resolution Peer Thresholds, and HLS segmenting with client SHA-256 segment auditing.
+Nostr Authentication & Background Worker: Implement NIP-07 key signing and persistent Service Worker thread handling NWC WebSocket connections and pre-fetched L402 state persistence.
+7-Platform Bridge Suite Integration: Build background daemons and Telegram bots ingesting YouTube RSS, Rumble RSS, Substack RSS, Telegram channels, Kick VODs, Odysee channels, and Podcasting 2.0 RSS feeds automatically.
+Storage & CDN Purge Setup: Configure S3 storage (Cloudflare R2) behind Cloudflare CDN edge proxies with automated cache-invalidation API webhooks.
+A.2 Phase 2: Universal Crypto Gateway, Session Balances & Anti-Sybil Contracts (Weeks 5–8)
+WebLN, NWC & WalletConnect Integration: Build unified wallet hook supporting WebLN desktop, NWC mobile, and WalletConnect Session Top-Ups for EVM/Solana with cross-chain DEX router hooks enforcing a $5.00 minimum top-up threshold.
+Genesis Token Contracts & Escrow Engine: Deploy SIP-010 smart contracts (decimals: 8), 4-year team vesting vaults, Locked Escrow Vault accounting logic, OpenTimestamp Bitcoin block-anchoring verification routines, and the Node Active Seeding Reputation Tracker (30-day / 100GB bandwidth minimums backed by signed Proof-of-Viewer receipts).
+Universal Paywall & Dual-Canvas Ad Engine: Deploy Overlaid Dual-Player Canvas for iOS, $PROOF Proof-Sat transfer hooks, and direct self-custody wallet export routines.
+Proof-of-Bandwidth & LTC DCA Billing: Implement WebRTC bandwidth measurement hooks, LTC creator hosting invoices, and automated DCA AMM liquidity routes.
+A.3 Phase 3: Moderation, NIP-09 Blacklisting & Safe-Harbor API (Weeks 9–11)
+Nostr Web of Trust (WoT) Integration: Client-side filtering ingesting public mute lists (NIP-51).
+Storage Pruning, NIP-09 Blacklisting & Safe-Harbor Endpoints: Program automated node moderation routines executing S3:DeleteObject calls, firing Cloudflare API cache purges, broadcasting signed NIP-09 deletion events, and exposing automated DMCA endpoints.
+A.4 Phase 4: Mobile Optimization, Launch & Open-Source Release (Weeks 12–14)
+Integrate LNURL deep-link fallbacks (lightning:) for webviews lacking embedded WebLN.
+Conduct end-to-end load testing on WebRTC mesh handoffs, minute 01:00 pre-fetched L402 challenges, and Dual-Canvas iOS audio context persistence.
+Publish complete MIT/CC0 open-source code repository to GitHub.
+APPENDIX B: L402 & HLS AES-128 Paywall Technical Specification
+To prevent unauthorized extraction of .m3u8 video URLs, locked streams utilize Segmented HLS AES-128 Encryption gated by Pre-Fetched L402 Tokens.
+B.1 Sequence Flow Diagram
++--------+             +------------+           +------------------+         +-------------------+
+| CLIENT |             | PROOF TUBE |           | L402 PROXY / LND |         | CDN / S3 STORAGE  |
++---+----+             +-----+------+           +--------+---------+         +---------+---------+
+    |                        |                           |                             |
+    | 1. Request Paywall Video|                           |                             |
+    +----------------------->|                           |                             |
+    |                        | 2. Fetch Master Playlist  |                             |
+    |                        |    (Segments 0-3m Free)   |                             |
+    |                        +-------------------------------------------------------->|
+    | 3. Return Playlist     |<--------------------------------------------------------+
+    |<-----------------------+                           |                             |
+    |                        |                           |                             |
+    | 4. AT MINUTE 01:00 (PRE-FETCH TRIGGER):            |                             |
+    |    Client pre-requests AES-128 Key in Background   |                             |
+    +--------------------------------------------------->|                             |
+    |                        |                           | 5. Generate L402 Challenge  |
+    | 6. HTTP 402 Payment Required                       |                             |
+    |    Header: `WWW-Authenticate: L402 Macaroon="...", Invoice="lnbc..."`            |
+    |<---------------------------------------------------+                             |
+    |                        |                           |                             |
+    | 7. Background Service Worker settles invoice via Lightning / Session Balance     |
+    |                        |                           |                             |
+    | 8. Retry Key Request with Header:                  |                             |
+    |    `Authorization: L402 <Macaroon>:<Preimage>`    |                             |
+    +--------------------------------------------------->|                             |
+    |                        |                           | 9. Verify Preimage &        |
+    |                                                      Macaroon Signature          |
+    | 10. HTTP 200 OK (Returns 16-byte AES-128 Key stored in local RAM)                 |
+    |<---------------------------------------------------+                             |
+    |                        |                           |                             |
+    | 11. AT MINUTE 03:00: Player seamlessly decrypts locked segments without buffering |
+    +---------------------------------------------------------------------------------->|
+
+
+B.2 Execution Mechanics
+Segmented Video Encryption at Encoding (ffmpeg): The transcoding queue encrypts post-minute-3 HLS segments (.ts) with a unique 16-byte AES-128 key, leaving segments 00:00 to 03:00 unencrypted:
+ffmpeg -i input.mp4 -hls_time 4 -hls_key_info_file key_info.txt -hls_playlist_type vod stream.m3u8
+
+
+Minute 01:00 Pre-Fetched L402 Challenge: At playback minute 01:00, the client player automatically issues a background request for the locked key at /api/v1/keys/{video_id}_locked. The L402 proxy returns an HTTP 402 payment challenge.
+Background Settlement & Zero-Buffering Playback: The persistent Service Worker thread settles the invoice via WebLN, NWC, or Session Top-Up between minute 01:00 and minute 03:00. Upon receiving the HTTP 200 OK containing the 16-byte AES-128 key, the key is held in RAM. When video playback reaches minute 03:00, the stream decrypts instantly without playback stutter or node proxy server surges.
