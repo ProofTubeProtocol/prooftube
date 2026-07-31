@@ -1,0 +1,33 @@
+// ProofTube Node.js Engine & Express API Server (v1.0-alpha)
+// Handles API routes, L402 paywall proxying, and PeerTube media orchestration
+
+const express = require('express');
+const cors = require('cors');
+
+const app = express();
+const PORT = process.env.PORT || 4000;
+
+app.use(cors());
+app.use(express.json());
+
+// Health Check Endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', protocol: 'ProofTube v2.14' });
+});
+
+// L402 Key Challenge Proxy Endpoint (Minute 01:00 Pre-Fetch)
+app.get('/api/v1/keys/:videoId', (req, res) => {
+  const { videoId } = req.params;
+  
+  // Return HTTP 402 Payment Required for gated content
+  res.setHeader('WWW-Authenticate', `L402 Macaroon="sample_macaroon_hash", Invoice="lnbc100n1p..."`);
+  return res.status(402).json({
+    error: 'Payment Required',
+    videoId,
+    message: 'Pre-fetch L402 invoice to unlock HLS segment decryption key.'
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`[ProofTube Server] Core node running on port ${PORT}`);
+});
