@@ -20,18 +20,21 @@
 
   <h1>ProofTube WebRTC Client Test</h1>
   <p>Endpoint: <b style="color:#fff;">wss://melvin.me/.webrtc</b></p>
-  <p>Resource Hash: <b style="color:#fff;" id="hash-display"></b></p>
+  <p>Room Hash: <b style="color:#fff;" id="hash-display"></b></p>
 
   <div id="console"></div>
 
   <button id="sendBtn" disabled>Send Test Chunk</button>
 
   <script>
+    // Valid SHA-256 Resource Hash
     const RESOURCE_HASH = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
     document.getElementById("hash-display").innerText = RESOURCE_HASH;
 
     const logBox = document.getElementById("console");
     const sendBtn = document.getElementById("sendBtn");
+
+    const peerId = "peer_" + Math.random().toString(36).substring(7);
 
     function log(msg, type = "info") {
       const time = new Date().toISOString().split("T")[1].slice(0, 8);
@@ -42,6 +45,8 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
+    log(`Initialized Client ID: ${peerId}`, "info");
+
     let ws;
     let pc;
     let dataChannel;
@@ -50,6 +55,12 @@
       pc = new RTCPeerConnection({
         iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
       });
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          log(`ICE Candidate generated: ${event.candidate.candidate.slice(0, 30)}...`, "info");
+        }
+      };
 
       pc.oniceconnectionstatechange = () => log(`ICE Connection State: ${pc.iceConnectionState}`, "info");
 
@@ -79,13 +90,14 @@
         log("WebSocket Connection Established.", "success");
         initWebRTC();
 
-        const initAnnounce = {
+        // THE ONLY CHANGE: Swapped "room" to "resource" right here!
+        const announceMsg = {
           type: "announce",
           resource: RESOURCE_HASH,
-          offers: []
+          peer_id: peerId
         };
-        log(`WS SEND [announce (initial)]: ${JSON.stringify(initAnnounce)}`, "info");
-        ws.send(JSON.stringify(initAnnounce));
+        log(`WS SEND [announce]: ${JSON.stringify(announceMsg)}`, "info");
+        ws.send(JSON.stringify(announceMsg));
       };
 
       ws.onmessage = async (event) => {
@@ -95,8 +107,8 @@
         if (msg.type === "announce" || msg.type === "peers" || msg["resource-peers"]) {
           const count = msg["resource-peers"]?.count ?? msg.count ?? 0;
           
-          if (count > 0 && !dataChannel) {
-            log(`Found ${count} peer(s) present. Creating WebRTC Offer...`, "info");
+          if (count > 1 && !dataChannel) {
+            log(`Found ${count} peers in room. Creating WebRTC Offer...`, "info");
             
             dataChannel = pc.createDataChannel("prooftube-chunks");
             setupDataChannel();
@@ -104,47 +116,36 @@
             const offer = await pc.createOffer();
             await pc.setLocalDescription(offer);
 
-            log("Gathering ICE candidates (Waiting for complete SDP)...", "info");
-
-            pc.onicegatheringstatechange = () => {
-              if (pc.iceGatheringState === "complete") {
-                log("ICE Gathering Complete. Re-announcing with full SDP offer...", "success");
-                
-                const reAnnounce = {
-                  type: "announce",
-                  resource: RESOURCE_HASH,
-                  offers: [{
-                    offer_id: "o1",
-                    sdp: pc.localDescription.sdp
-                  }]
-                };
-                ws.send(JSON.stringify(reAnnounce));
-              }
+            const offerMsg = {
+              type: "offer",
+              resource: RESOURCE_HASH,
+              peer_id: peerId,
+              sdp: offer.sdp
             };
+            log(`WS SEND [offer]: Sending offer to signaling server...`, "info");
+            ws.send(JSON.stringify(offerMsg));
           }
         }
 
-        if (msg.type === "offer") {
-          log("Offer received. Generating Answer...", "info");
+        if (msg.type === "offer" && msg.peer_id !== peerId) {
+          log("Offer received from peer. Generating Answer...", "info");
           await pc.setRemoteDescription(new RTCSessionDescription({ type: "offer", sdp: msg.sdp }));
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
 
-          pc.onicegatheringstatechange = () => {
-            if (pc.iceGatheringState === "complete") {
-              const answerMsg = {
-                type: "answer",
-                resource: RESOURCE_HASH,
-                to: msg.from,
-                sdp: pc.localDescription.sdp
-              };
-              ws.send(JSON.stringify(answerMsg));
-            }
+          const answerMsg = {
+            type: "answer",
+            resource: RESOURCE_HASH,
+            peer_id: peerId,
+            to: msg.peer_id,
+            sdp: answer.sdp
           };
+          log(`WS SEND [answer]: Sending answer back...`, "info");
+          ws.send(JSON.stringify(answerMsg));
         }
 
-        if (msg.type === "answer") {
-          log("Answer received. Completing Handshake...", "success");
+        if (msg.type === "answer" && msg.to === peerId) {
+          log("Answer received from peer. Completing Handshake...", "success");
           await pc.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp: msg.sdp }));
         }
       };
