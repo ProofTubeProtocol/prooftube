@@ -21,3 +21,13 @@ MVP is currently in active development.
 ## 📄 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
+---
+
+## ⚡ Support the Project
+
+If you'd like to support the continued development of ProofTube, micro-donations via Bitcoin Lightning are greatly appreciated:
+
+* **Lightning Address:** `prooftube@getalby.com`
+* **Direct Tip:** [Send Sats via Alby](https://getalby.com/p/prooftube)
+
+---
