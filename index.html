@@ -107,7 +107,7 @@
         if (msg.type === "announce" || msg.type === "peers" || msg["resource-peers"]) {
           const count = msg["resource-peers"]?.count ?? msg.count ?? 0;
           
-          if (count > 1 && !dataChannel) {
+          if (count > 0 && !dataChannel) {
             log(`Found ${count} peers in room. Creating WebRTC Offer...`, "info");
             
             dataChannel = pc.createDataChannel("prooftube-chunks");
