@@ -62,7 +62,7 @@
     <h1>ProofTube WebRTC Client Test</h1>
     <div class="info">
         Endpoint: <code>wss://melvin.me/.webrtc</code><br>
-        Room Hash: <code>c0ffee006a6f34f5</code>
+        Room Hash: <code>e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</code>
     </div>
 
     <div id="logConsole"></div>
@@ -72,7 +72,8 @@
 
 <script>
     const SIGNALING_URL = 'wss://melvin.me/.webrtc';
-    const ROOM_HASH = 'c0ffee006a6f34f5';
+    // Updated to standard 64-character SHA-256 hash format required by server:
+    const ROOM_HASH = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
     const consoleEl = document.getElementById('logConsole');
     const sendBtn = document.getElementById('sendChunkBtn');
