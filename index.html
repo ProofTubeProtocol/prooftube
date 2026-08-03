@@ -27,13 +27,16 @@
   <button id="sendBtn" disabled>Send Test Chunk</button>
 
   <script>
-    // Valid SHA-256 Resource Hash
+    // Valid SHA-256 Resource Hash — any hex hash creates its room on first
+    // announce (Pod Signaling Protocol §6); nothing is provisioned server-side.
     const RESOURCE_HASH = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
     document.getElementById("hash-display").innerText = RESOURCE_HASH;
 
     const logBox = document.getElementById("console");
     const sendBtn = document.getElementById("sendBtn");
 
+    // Local label only — the server assigns the real peer id and sends it
+    // as `from` in relayed frames; anything we invent here is ignored.
     const peerId = "peer_" + Math.random().toString(36).substring(7);
 
     function log(msg, type = "info") {
@@ -50,6 +53,8 @@
     let ws;
     let pc;
     let dataChannel;
+    let myOfferId = null;      // set when we are the offering side
+    let keepalive = null;      // idle sockets are dropped after ~50s (SPEC §2.1)
 
     function initWebRTC() {
       pc = new RTCPeerConnection({
@@ -70,16 +75,34 @@
       };
     }
 
+    // The room dialect has no trickle ICE: candidates must be baked into the
+    // SDP, so wait for gathering to finish before sending it (SPEC §6).
+    function waitForIceComplete() {
+      if (pc.iceGatheringState === "complete") return Promise.resolve();
+      return new Promise((resolve) => {
+        const done = () => { pc.removeEventListener("icegatheringstatechange", check); resolve(); };
+        const check = () => { if (pc.iceGatheringState === "complete") done(); };
+        pc.addEventListener("icegatheringstatechange", check);
+        setTimeout(done, 3000); // fallback: ship what we have
+      });
+    }
+
     function setupDataChannel() {
       dataChannel.onopen = () => {
         log(">>> P2P DataChannel is OPEN! You are connected! <<<", "success");
         sendBtn.disabled = false;
         sendBtn.classList.add("active");
+        clearInterval(keepalive); // the P2P link no longer needs the signaling socket
       };
 
       dataChannel.onmessage = (e) => {
         log(`RECV P2P CHUNK: ${e.data}`, "success");
       };
+    }
+
+    function sendSignal(payload) {
+      log(`WS SEND [${payload.type}]: ${JSON.stringify(payload).slice(0, 120)}`, "info");
+      ws.send(JSON.stringify(payload));
     }
 
     function connect() {
@@ -90,77 +113,74 @@
         log("WebSocket Connection Established.", "success");
         initWebRTC();
 
-        // THE ONLY CHANGE: Swapped "room" to "resource" right here!
-        const announceMsg = {
-          type: "announce",
-          resource: RESOURCE_HASH,
-          peer_id: peerId
-        };
-        log(`WS SEND [announce]: ${JSON.stringify(announceMsg)}`, "info");
-        ws.send(JSON.stringify(announceMsg));
+        // Join the room with no offers yet; the reply's `count` tells us
+        // whether anyone is already waiting (count excludes ourselves).
+        sendSignal({ type: "announce", resource: RESOURCE_HASH, offers: [] });
+
+        // Keepalive: re-announce with empty offers every 25s — announce is an
+        // idempotent membership refresh, and idle sockets die at ~50s.
+        keepalive = setInterval(() => {
+          if (ws.readyState === 1) sendSignal({ type: "announce", resource: RESOURCE_HASH, offers: [] });
+        }, 25000);
       };
 
       ws.onmessage = async (event) => {
         const msg = JSON.parse(event.data);
-        log(`WS RECV: ${JSON.stringify(msg)}`, msg.type === "error" ? "err" : "info");
+        log(`WS RECV: ${JSON.stringify(msg).slice(0, 120)}`, msg.type === "error" ? "err" : "info");
 
-        if (msg.type === "announce" || msg.type === "peers" || msg["resource-peers"]) {
-          const count = msg["resource-peers"]?.count ?? msg.count ?? 0;
-          
-          if (count > 0 && !dataChannel) {
-            log(`Found ${count} peers in room. Creating WebRTC Offer...`, "info");
-            
-            dataChannel = pc.createDataChannel("prooftube-chunks");
-            setupDataChannel();
+        // Someone is already in the room -> we are the offering side.
+        // Offers travel INSIDE an announce (SPEC §6), one per existing peer.
+        if (msg.type === "resource-peers" && msg.count > 0 && !myOfferId && !dataChannel) {
+          log(`Found ${msg.count} peer(s) in room. Creating WebRTC Offer...`, "info");
+          dataChannel = pc.createDataChannel("prooftube-chunks");
+          setupDataChannel();
 
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          await waitForIceComplete();
 
-            const offerMsg = {
-              type: "offer",
-              resource: RESOURCE_HASH,
-              peer_id: peerId,
-              sdp: offer.sdp
-            };
-            log(`WS SEND [offer]: Sending offer to signaling server...`, "info");
-            ws.send(JSON.stringify(offerMsg));
-          }
+          myOfferId = "o_" + Math.random().toString(36).substring(7);
+          sendSignal({
+            type: "announce",
+            resource: RESOURCE_HASH,
+            offers: [{ offer_id: myOfferId, sdp: pc.localDescription.sdp }]
+          });
         }
 
-        if (msg.type === "offer" && msg.peer_id !== peerId) {
+        // A peer's offer, relayed to us. `from` is the server-assigned id of
+        // the other peer — answer back to it, echoing the offer_id.
+        if (msg.type === "offer" && msg.sdp && !myOfferId) {
           log("Offer received from peer. Generating Answer...", "info");
-          await pc.setRemoteDescription(new RTCSessionDescription({ type: "offer", sdp: msg.sdp }));
+          await pc.setRemoteDescription({ type: "offer", sdp: msg.sdp });
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
+          await waitForIceComplete();
 
-          const answerMsg = {
+          sendSignal({
             type: "answer",
             resource: RESOURCE_HASH,
-            peer_id: peerId,
-            to: msg.peer_id,
-            sdp: answer.sdp
-          };
-          log(`WS SEND [answer]: Sending answer back...`, "info");
-          ws.send(JSON.stringify(answerMsg));
+            to: msg.from,
+            offer_id: msg.offer_id,
+            sdp: pc.localDescription.sdp
+          });
         }
 
-        if (msg.type === "answer" && msg.to === peerId) {
+        // The answer to OUR offer (matched by offer_id; arrives with `from`).
+        if (msg.type === "answer" && msg.offer_id === myOfferId && msg.sdp) {
           log("Answer received from peer. Completing Handshake...", "success");
-          await pc.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp: msg.sdp }));
+          await pc.setRemoteDescription({ type: "answer", sdp: msg.sdp });
         }
       };
 
-      ws.onerror = (err) => log(`WebSocket Error`, "err");
+      ws.onerror = () => log("WebSocket Error encountered.", "err");
       ws.onclose = () => log("WebSocket Connection closed.", "err");
     }
 
-    sendBtn.addEventListener("click", () => {
-      if (dataChannel && dataChannel.readyState === "open") {
-        const payload = `PROOFTUBE_CHUNK_HASH_${Math.random().toString(36).substring(7).toUpperCase()}`;
-        dataChannel.send(payload);
-        log(`SENT P2P CHUNK: ${payload}`, "info");
-      }
-    });
+    sendBtn.onclick = () => {
+      const chunk = "CHUNK_" + Math.random().toString(36).substring(2, 10);
+      log(`SEND P2P CHUNK: ${chunk}`, "success");
+      dataChannel.send(chunk);
+    };
 
     connect();
   </script>
